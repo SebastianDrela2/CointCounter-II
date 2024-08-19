@@ -69,7 +69,20 @@
             _combinations = possibilites.Select(x => CreateCombination(x, possibilites, amountStruct, goal, string.Empty)).ToList();
         }
 
-        public Combination CreateCombination(int value, List<int> possibilities, Amount amount, int remainder, string path, Combination? parent = null)
+        public List<Combination> GetNodes()
+        {
+            var resultList = new List<Combination>();
+            var combinations = _combinations;
+
+            foreach (var node in combinations)
+            {
+                Visit(node, resultList);
+            }
+
+            return resultList;
+        }
+
+        private static Combination CreateCombination(int value, List<int> possibilities, Amount amount, int remainder, string path, Combination? parent = null)
         {
             var decrementedRemainder = remainder - value;
             path += value;
@@ -93,20 +106,7 @@
 
             return new Combination(value, amount, decrementedRemainder, path);
         }
-
-        public List<Combination> GetNodes()
-        {
-            var resultList = new List<Combination>();
-            var combinations = _combinations;
-
-            foreach(var node in combinations)
-            {
-                Visit(node, resultList);
-            }
-
-            return resultList;
-        }
-
+        
         private static void Visit(Combination node, List<Combination> resultList)
         {
             if (node.Remainder == 0)
