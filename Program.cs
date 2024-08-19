@@ -92,13 +92,8 @@
                 amount.CurrentAmount--;
 
                 var limitedPossitilbiites = possibilities.Where(x => x <= decrementedRemainder && x <= value).ToList();
-
                 var children = limitedPossitilbiites
-                    .Select(x =>
-                    {
-                        return CreateCombination(x, possibilities, amount, decrementedRemainder, path, parent);
-
-                    }).ToList();
+                    .Select(value => CreateCombination(value, possibilities, amount, decrementedRemainder, path, parent)).ToList();
 
                 return new Combination(value, amount, decrementedRemainder, path, children, parent);
 
