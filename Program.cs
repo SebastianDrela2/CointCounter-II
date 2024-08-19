@@ -37,36 +37,26 @@
     public class CoinCounter
     {
         private readonly int _goal;
-        private readonly List<int> _orderedPossibilites;        
-        private readonly int _count = 0;
+        private readonly List<int> _orderedPossibilites;               
 
         public readonly CombinationManager CombinationManager;
         public CoinCounter(int goal,  List<int> possibilites)
         {
             _goal = goal;
-            _orderedPossibilites = possibilites.Distinct().OrderByDescending(x => x).ToList();
-            _count = GetCount();
+            _orderedPossibilites = possibilites.Distinct().OrderByDescending(x => x).ToList();           
             CombinationManager = GetManager();
         }
-
-        private int GetCount()
-        {
-            var smallestPossibility = _orderedPossibilites.Last();
-
-            return _goal / smallestPossibility;
-        }
         
-        private CombinationManager GetManager() => new CombinationManager(_orderedPossibilites, _count, _goal);       
+        private CombinationManager GetManager() => new CombinationManager(_orderedPossibilites, _goal);       
     }
 
     public class CombinationManager
     {       
         private readonly List<Combination> _combinations;
 
-        public CombinationManager(List<int> possibilites, int amount, int goal)
-        {
-            var amountStruct = new Amount { CurrentAmount = amount, GlobalAmount = amount };
-            _combinations = possibilites.Select(x => CreateCombination(x, possibilites, amountStruct, goal, string.Empty)).ToList();
+        public CombinationManager(List<int> possibilites, int goal)
+        {           
+            _combinations = possibilites.Select(x => CreateCombination(x, possibilites, goal, string.Empty)).ToList();
         }
 
         public List<Combination> GetNodes()
@@ -82,28 +72,25 @@
             return resultList;
         }
 
-        private static Combination CreateCombination(int value, List<int> possibilities, Amount amount, int remainder, string path, Combination? parent = null)
+        private static Combination CreateCombination(int value, List<int> possibilities, int remainder, string path, Combination? parent = null)
         {
             var decrementedRemainder = remainder - value;
             path += value;
 
-            if (amount.CurrentAmount > 0 && decrementedRemainder > 0)
-            {
-                amount.CurrentAmount--;
-
-                var limitedPossitilbiites = possibilities
+            if (decrementedRemainder > 0)
+            {              
+                var limitedPossibilities = possibilities
                     .Where(item => item <= decrementedRemainder && item <= value).ToList();
 
-                var children = limitedPossitilbiites
-                    .Select(value => CreateCombination(value, possibilities, amount, decrementedRemainder, path, parent)).ToList();
+                var children = limitedPossibilities
+                    .Select(value => CreateCombination(value, limitedPossibilities, decrementedRemainder, path, parent)).ToList();
 
-                return new Combination(value, amount, decrementedRemainder, path, children, parent);
-
+                return new Combination(value, decrementedRemainder, path, children, parent);
             }
 
-            return new Combination(value, amount, decrementedRemainder, path);
+            return new Combination(value, decrementedRemainder, path);
         }
-        
+
         private static void Visit(Combination node, List<Combination> resultList)
         {
             if (node.Remainder == 0)
@@ -122,8 +109,7 @@
     }
 
     public class Combination
-    {
-        public int Depth;    
+    {         
         public int Remainder;
         public int Value;
         public List<Combination>? Children;
@@ -131,8 +117,7 @@
         public string Path;
         
         public Combination(
-            int value, 
-            Amount amount, 
+            int value,             
             int remainder, 
             string path, 
             List<Combination>? children = null, 
@@ -140,16 +125,15 @@
         {
             Value = value;
             Remainder = remainder;
-            Path = path;
-            Depth = amount.GlobalAmount - amount.CurrentAmount;
+            Path = path;           
             Children = children;
             Parent = parent;
         }
     }
 
-    public struct Amount
+    public class Amount
     {
-        public int GlobalAmount;
-        public int CurrentAmount;
+        public int GlobalAmount { get; set; }
+        public int CurrentAmount { get; set; }
     }
 }
