@@ -126,42 +126,13 @@
 
     public class Combination
     {
-        public int Depth;
-        public int Index;
+        public int Depth;    
         public int Remainder;
-
         public int Value;
-        public bool Used;
-
         public List<Combination>? Children;
         public Combination? Parent;
-
         public string Path;
         
-        public Combination(int value, List<int> possibilities, Amount amount, int remainder, string path, Combination? parent = null)
-        {
-            Remainder = remainder - value;
-            Parent = parent;            
-            Path = path += value;
-
-            if (amount.CurrentAmount > 0 && remainder - value > 0)
-            {
-                Depth = amount.GlobalAmount - amount.CurrentAmount;
-                amount.CurrentAmount--;
-
-                Value = value;
-
-                var limitedPossitilbiites = possibilities.Where(x => x <= remainder - value && x <= value).ToList();               
-
-                Children = limitedPossitilbiites                    
-                    .Select(x =>
-                    {                        
-                        return new Combination(x, possibilities, amount, remainder - value, path, this);
-
-                    }).ToList();                              
-            }
-        }
-
         public Combination(int 
             value, Amount 
             amount, int 
@@ -176,7 +147,7 @@
             Depth = amount.GlobalAmount - amount.CurrentAmount;
             Children = children;
             Parent = parent;
-        }       
+        }
     }
 
     public struct Amount
