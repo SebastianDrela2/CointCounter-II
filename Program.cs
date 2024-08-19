@@ -128,10 +128,10 @@
         public Combination? Parent;
         public string Path;
         
-        public Combination(int 
-            value, Amount 
-            amount, int 
-            remainder, 
+        public Combination(
+            int value, 
+            Amount amount, 
+            int remainder, 
             string path, 
             List<Combination>? children = null, 
             Combination? parent = null)
