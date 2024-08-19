@@ -66,7 +66,32 @@
         public CombinationManager(List<int> possibilites, int amount, int goal)
         {
             var amountStruct = new Amount { CurrentAmount = amount, GlobalAmount = amount };
-            _combinations = possibilites.Select(x => new Combination(x, possibilites, amountStruct, goal, string.Empty)).ToList();
+            _combinations = possibilites.Select(x => CreateCombination(x, possibilites, amountStruct, goal, string.Empty)).ToList();
+        }
+
+        public Combination CreateCombination(int value, List<int> possibilities, Amount amount, int remainder, string path, Combination? parent = null)
+        {
+            var decrementedRemainder = remainder - value;
+            path += value;
+
+            if (amount.CurrentAmount > 0 && decrementedRemainder > 0)
+            {
+                amount.CurrentAmount--;
+
+                var limitedPossitilbiites = possibilities.Where(x => x <= decrementedRemainder && x <= value).ToList();
+
+                var children = limitedPossitilbiites
+                    .Select(x =>
+                    {
+                        return CreateCombination(x, possibilities, amount, decrementedRemainder, path, parent);
+
+                    }).ToList();
+
+                return new Combination(value, amount, decrementedRemainder, path, children, parent);
+
+            }
+
+            return new Combination(value, amount, decrementedRemainder, path);
         }
 
         public List<Combination> GetNodes()
@@ -108,7 +133,7 @@
         public int Value;
         public bool Used;
 
-        public List<Combination> Children;
+        public List<Combination>? Children;
         public Combination? Parent;
 
         public string Path;
@@ -116,29 +141,42 @@
         public Combination(int value, List<int> possibilities, Amount amount, int remainder, string path, Combination? parent = null)
         {
             Remainder = remainder - value;
-            Parent = parent;
+            Parent = parent;            
+            Path = path += value;
 
-            path += value;
-            Path = path;
-
-            if (amount.CurrentAmount > 0 && Remainder > 0)
+            if (amount.CurrentAmount > 0 && remainder - value > 0)
             {
                 Depth = amount.GlobalAmount - amount.CurrentAmount;
                 amount.CurrentAmount--;
 
                 Value = value;
 
-                var limitedPossitilbiites = possibilities.Where(x => x <= Remainder && x <= value).ToList();               
+                var limitedPossitilbiites = possibilities.Where(x => x <= remainder - value && x <= value).ToList();               
 
                 Children = limitedPossitilbiites                    
                     .Select(x =>
                     {                        
-                        return new Combination(x, possibilities, amount, Remainder, path, this);
+                        return new Combination(x, possibilities, amount, remainder - value, path, this);
 
-                    }).ToList(); 
-                               
+                    }).ToList();                              
             }
         }
+
+        public Combination(int 
+            value, Amount 
+            amount, int 
+            remainder, 
+            string path, 
+            List<Combination>? children = null, 
+            Combination? parent = null)
+        {
+            Value = value;
+            Remainder = remainder;
+            Path = path;
+            Depth = amount.GlobalAmount - amount.CurrentAmount;
+            Children = children;
+            Parent = parent;
+        }       
     }
 
     public struct Amount
